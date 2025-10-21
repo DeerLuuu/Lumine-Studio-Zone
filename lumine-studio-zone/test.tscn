@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://d1ora6732r51b"]
+
+[ext_resource type="Script" uid="uid://c5t4xqbi2m1ii" path="res://test.gd" id="1_37kl0"]
+[ext_resource type="Texture2D" uid="uid://c5nwswydkfraw" path="res://icon.svg" id="2_8uh7m"]
+
+[node name="Test" type="Node2D"]
+script = ExtResource("1_37kl0")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(522, 316)
+texture = ExtResource("2_8uh7m")
+
+[node name="TextEdit" type="TextEdit" parent="."]
+offset_right = 332.0
+offset_bottom = 640.0

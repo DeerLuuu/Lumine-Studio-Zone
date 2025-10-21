@@ -13,3 +13,8 @@ config_version=5
 config/name="Lumine Studio Zone"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+EventController="*res://scripts/auto/event_controller.gd"
+CommandController="*res://scripts/auto/command_controller.gd"
