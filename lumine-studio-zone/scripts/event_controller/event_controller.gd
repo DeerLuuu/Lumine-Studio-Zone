@@ -102,7 +102,6 @@ func subscribe(
 	if not has_signal(event_name):
 		add_user_signal(event_name)
 
-	# 防止重复订阅
 	for conn in get_signal_connection_list(event_name):
 		if conn["callable"] == callback:
 			push_warning("Callback already subscribed to event: %s" % event_name)

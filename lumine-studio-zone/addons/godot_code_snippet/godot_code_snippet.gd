@@ -11,10 +11,21 @@ func _enter_tree() -> void:
 	script_editor = EditorInterface.get_script_editor()
 	script_editor.editor_script_changed.connect(_on_script_file_changed)
 	script_editor.editor_script_changed.emit(script_editor.get_current_script())
-	print(get_all_script_path())
+	var fl = EditorInterface.get_resource_filesystem()
+	fl.filesystem_changed.connect(fs_update)
 
 func _exit_tree() -> void:
-	pass
+	script_editor = null
+	default = {}
+	snippets = {}
+
+func fs_update() -> void:
+	var all_script_path : Array[String] = get_all_script_path()
+	for i in all_script_path:
+		var file = FileAccess.open(i, FileAccess.READ)
+		var script_lines : Array = file.get_as_text().split("\n")
+		for line in script_lines:
+			check_script_has_auto_tip(line)
 
 # FUNC 更新自定义代码片段
 func update_code_block_dic() -> void:
@@ -26,31 +37,33 @@ func _on_script_file_changed(script : Script) -> void:
 	if not current_editor: return
 	var code_edit : CodeEdit = _find_code_edit(current_editor)
 	if not code_edit: return
-
-	code_edit.text_changed.connect(_on_script_changed.bind(code_edit))
 	# 自定义代码段的补全相关信号链接
 	if code_edit.code_completion_requested.is_connected(_on_code_completion_requested):
 		code_edit.code_completion_requested.disconnect(_on_code_completion_requested)
 	code_edit.code_completion_requested.connect(_on_code_completion_requested.bind(code_edit))
 
-func _on_script_changed(code_edit : CodeEdit) -> void:
-	check_script_has_auto_tip(code_edit)
-
 # FUNC 激活自动补全时的信号方法
 func _on_code_completion_requested(code_edit : CodeEdit):
 	var line_text : String = get_current_line_text(code_edit)
-	if line_text.contains("\"") or line_text.contains("\'"): return
 	var prefix = _get_selected_text(code_edit)
-	snippets.merge(default)
-	for keyword in snippets:
-		if keyword.begins_with(prefix):
-			# 添加自定义补全项
+	if line_text.contains("\"") or line_text.contains("\'"):
+		if not line_text.contains("subscribe("): return
+		for keyword in snippets:
 			code_edit.add_code_completion_option(
 				CodeEdit.KIND_FUNCTION,
 				keyword,
 				snippets[keyword],
 				Color.AQUA
 				)
+		return
+	for keyword in default:
+		# 添加自定义补全项
+		code_edit.add_code_completion_option(
+			CodeEdit.KIND_FUNCTION,
+			keyword,
+			default[keyword],
+			Color.AQUA
+			)
 
 # FUNC 获取当前行代码
 func get_current_line_text(_code_edit: CodeEdit) -> String:
@@ -107,14 +120,14 @@ func _traverse_fs(dir : EditorFileSystemDirectory) -> Array[String]:
 	return r
 
 # FUNC 根据特定格式将一些关键词添加到自动提示中
-func check_script_has_auto_tip(code_edit : CodeEdit) -> void:
-	var current_line_str : String = get_current_line_text(code_edit)
-	if current_line_str.contains("signal:"):
+func check_script_has_auto_tip(line : String) -> void:
+	var current_line_str : String = line
+	if current_line_str.contains("event:"):
 		if current_line_str.contains("contains"): return
-		if current_line_str.contains("signal:\""): return
-		var current_str_pos : int = current_line_str.find("l:")
+		if current_line_str.contains("event:\""): return
+		if current_line_str.contains("%"): return
+		var current_str_pos : int = current_line_str.find("t:")
 		current_line_str = current_line_str.erase(0, current_str_pos + 2)
 		var del_str_pos : int = current_line_str.find("\"")
 		current_line_str = current_line_str.erase(del_str_pos, current_line_str.length() - del_str_pos)
-		snippets[current_line_str] = "signal:" + current_line_str
-		print(snippets)
+		snippets[current_line_str] = "event:" + current_line_str
