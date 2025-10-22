@@ -3,6 +3,7 @@ extends EditorPlugin
 
 # NOTE 代码编辑器
 var script_editor: ScriptEditor
+var config : Dictionary
 var default : Dictionary
 var snippets : Dictionary
 
@@ -18,6 +19,7 @@ func _exit_tree() -> void:
 	script_editor = null
 	default = {}
 	snippets = {}
+	config = {}
 
 func fs_update() -> void:
 	var all_script_path : Array[String] = get_all_script_path()
@@ -29,7 +31,7 @@ func fs_update() -> void:
 
 # FUNC 更新自定义代码片段
 func update_code_block_dic() -> void:
-	default = preload("res://custom_codes/my_code.json").data
+	default = preload("res://addons/godot_code_snippet/config.json").data["my_custom_codes"]
 
 func _on_script_file_changed(script : Script) -> void:
 	update_code_block_dic()
@@ -48,6 +50,7 @@ func _on_code_completion_requested(code_edit : CodeEdit):
 	var prefix = _get_selected_text(code_edit)
 	if line_text.contains("\"") or line_text.contains("\'"):
 		if not line_text.contains("subscribe("): return
+		if snippets.is_empty(): return
 		for keyword in snippets:
 			code_edit.add_code_completion_option(
 				CodeEdit.KIND_FUNCTION,
@@ -56,6 +59,7 @@ func _on_code_completion_requested(code_edit : CodeEdit):
 				Color.AQUA
 				)
 		return
+	if default.is_empty(): return
 	for keyword in default:
 		# 添加自定义补全项
 		code_edit.add_code_completion_option(
@@ -121,13 +125,13 @@ func _traverse_fs(dir : EditorFileSystemDirectory) -> Array[String]:
 
 # FUNC 根据特定格式将一些关键词添加到自动提示中
 func check_script_has_auto_tip(line : String) -> void:
-	var current_line_str : String = line
-	if current_line_str.contains("event:"):
-		if current_line_str.contains("contains"): return
-		if current_line_str.contains("event:\""): return
-		if current_line_str.contains("%"): return
-		var current_str_pos : int = current_line_str.find("t:")
-		current_line_str = current_line_str.erase(0, current_str_pos + 2)
-		var del_str_pos : int = current_line_str.find("\"")
-		current_line_str = current_line_str.erase(del_str_pos, current_line_str.length() - del_str_pos)
-		snippets[current_line_str] = "event:" + current_line_str
+	config = preload("res://addons/godot_code_snippet/config.json").data["config"]
+	if not config["auto_add_reg_ex_enabled"]: return
+	var regex : RegEx = RegEx.new()
+	for rule in config["auto_add_reg_ex"].values():
+		regex.compile(rule[0])
+		var result = regex.search(line)
+		if result:
+			var str : String = result.get_string().remove_chars(" ").trim_prefix(rule[1])
+			snippets[str] = "event:" + str
+			print(str)
