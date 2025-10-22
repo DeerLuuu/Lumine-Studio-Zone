@@ -7,9 +7,9 @@ var text_arr : Array
 var undo_text_arr : Array
 
 func _ready() -> void:
-	EventController.subscribe("command_executed", _on_command_executed)
-	EventController.subscribe("command_undone", _on_command_undone)
-	EventController.subscribe("command_redone", _on_command_redone)
+	EventController.subscribe("signal:command_executed", _on_command_executed)
+	EventController.subscribe("signal:command_undone", _on_command_undone)
+	EventController.subscribe("signal:command_redone", _on_command_redone)
 
 func _process(_delta: float) -> void:
 	var dir : Vector2 = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")

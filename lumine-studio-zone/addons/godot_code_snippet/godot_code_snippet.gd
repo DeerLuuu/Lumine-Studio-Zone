@@ -3,38 +3,45 @@ extends EditorPlugin
 
 # NOTE 代码编辑器
 var script_editor: ScriptEditor
+var default : Dictionary
 var snippets : Dictionary
 
 func _enter_tree() -> void:
 	update_code_block_dic()
 	script_editor = EditorInterface.get_script_editor()
-	script_editor.editor_script_changed.connect(_on_script_changed)
+	script_editor.editor_script_changed.connect(_on_script_file_changed)
 	script_editor.editor_script_changed.emit(script_editor.get_current_script())
+	print(get_all_script_path())
 
 func _exit_tree() -> void:
 	pass
 
 # FUNC 更新自定义代码片段
 func update_code_block_dic() -> void:
-	snippets = preload("res://custom_codes/my_code.json").data
+	default = preload("res://custom_codes/my_code.json").data
 
-func _on_script_changed(script : Script) -> void:
+func _on_script_file_changed(script : Script) -> void:
 	update_code_block_dic()
 	var current_editor = script_editor.get_current_editor()
 	if not current_editor: return
 	var code_edit : CodeEdit = _find_code_edit(current_editor)
 	if not code_edit: return
+
+	code_edit.text_changed.connect(_on_script_changed.bind(code_edit))
 	# 自定义代码段的补全相关信号链接
-	check_script_has_auto_tip(code_edit)
 	if code_edit.code_completion_requested.is_connected(_on_code_completion_requested):
 		code_edit.code_completion_requested.disconnect(_on_code_completion_requested)
 	code_edit.code_completion_requested.connect(_on_code_completion_requested.bind(code_edit))
+
+func _on_script_changed(code_edit : CodeEdit) -> void:
+	check_script_has_auto_tip(code_edit)
 
 # FUNC 激活自动补全时的信号方法
 func _on_code_completion_requested(code_edit : CodeEdit):
 	var line_text : String = get_current_line_text(code_edit)
 	if line_text.contains("\"") or line_text.contains("\'"): return
 	var prefix = _get_selected_text(code_edit)
+	snippets.merge(default)
 	for keyword in snippets:
 		if keyword.begins_with(prefix):
 			# 添加自定义补全项
@@ -80,8 +87,34 @@ func _find_code_edit(node: Node) -> CodeEdit:
 		if result: return result
 	return null
 
+# FUNC 获取所有脚本路径
+func get_all_script_path() -> Array[String]:
+	var r : Array[String]
+	var fs = get_editor_interface().get_resource_filesystem()
+	var fs_path = fs.get_filesystem()
+	r = _traverse_fs(fs_path)
+	return r
+
+# FUNC 遍历文件系统的文件夹以获取路径
+func _traverse_fs(dir : EditorFileSystemDirectory) -> Array[String]:
+	var r : Array[String] = []
+	for i in dir.get_file_count():
+		var path = dir.get_file_path(i)
+		if path.get_extension() in ["gd"]:
+			r.append(path)
+	for i in dir.get_subdir_count():
+		r.append_array(_traverse_fs(dir.get_subdir(i)))
+	return r
+
 # FUNC 根据特定格式将一些关键词添加到自动提示中
 func check_script_has_auto_tip(code_edit : CodeEdit) -> void:
 	var current_line_str : String = get_current_line_text(code_edit)
 	if current_line_str.contains("signal:"):
-		snippets[""] = ""
+		if current_line_str.contains("contains"): return
+		if current_line_str.contains("signal:\""): return
+		var current_str_pos : int = current_line_str.find("l:")
+		current_line_str = current_line_str.erase(0, current_str_pos + 2)
+		var del_str_pos : int = current_line_str.find("\"")
+		current_line_str = current_line_str.erase(del_str_pos, current_line_str.length() - del_str_pos)
+		snippets[current_line_str] = "signal:" + current_line_str
+		print(snippets)
