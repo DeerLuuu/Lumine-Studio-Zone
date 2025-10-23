@@ -56,7 +56,8 @@ func _on_code_completion_requested(code_edit : CodeEdit):
 				CodeEdit.KIND_FUNCTION,
 				keyword,
 				snippets[keyword],
-				Color.AQUA
+				Color.AQUA,
+				load("res://addons/godot_code_snippet/icons/tip_icon_1.svg")
 				)
 		return
 	if default.is_empty(): return
@@ -64,9 +65,10 @@ func _on_code_completion_requested(code_edit : CodeEdit):
 		# 添加自定义补全项
 		code_edit.add_code_completion_option(
 			CodeEdit.KIND_FUNCTION,
-			keyword,
+			keyword + " ",
 			default[keyword],
-			Color.AQUA
+			Color.AQUA,
+			load("res://addons/godot_code_snippet/icons/tip_icon_2.svg")
 			)
 
 # FUNC 获取当前行代码
@@ -132,6 +134,6 @@ func check_script_has_auto_tip(line : String) -> void:
 		regex.compile(rule[0])
 		var result = regex.search(line)
 		if result:
-			var str : String = result.get_string().remove_chars(" ").trim_prefix(rule[1])
-			snippets[str] = "event:" + str
-			print(str)
+			var str : String = result.get_string().remove_chars(" ")
+			str = str.trim_prefix(rule[1]) if rule.size() == 2 else str
+			snippets[str] = str
