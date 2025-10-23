@@ -19,6 +19,7 @@
 		"tweenc" : "var tween : Tween = create_tween()",
 	},
 	"config" : {
+		"inline_completion_enabled" : false,
 		"auto_add_reg_ex_enabled" : true,
 		"auto_add_reg_ex" : {
 			"auto_add_event_name_rule" : [
