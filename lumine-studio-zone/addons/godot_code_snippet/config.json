@@ -29,7 +29,11 @@
 			"auto_add_state_name_rule" : [
 				"state_name\\s*=\\s*\"state:\\s*[^\"]*",
 				"state_name=\""
-				]
+				],
+			"auto_add_bb_name_rule" : [
+				"add_value\\(\"bb:[^\"]*",
+				"add_value(\""
+				],
 		},
 	},
 }

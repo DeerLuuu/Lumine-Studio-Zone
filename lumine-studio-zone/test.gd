@@ -5,15 +5,20 @@ extends Node2D
 
 var text_arr : Array
 var undo_text_arr : Array
+var bb : Blackboard
 
 func _ready() -> void:
+	bb = Blackboard.new()
+
+	EventController.subscribe("event:blackboard_key_changed", func(key : String, value : Variant, old_value : Variant) -> void:
+		print(key))
 	EventController.subscribe("event:command_executed", _on_command_executed)
 	EventController.subscribe("event:command_undone", _on_command_undone)
 	EventController.subscribe("event:command_redone", _on_command_redone)
 
 func _process(_delta: float) -> void:
-	var dir : Vector2 = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-	if dir != Vector2.ZERO: move_excuted(dir)
+	bb.add_value("bb:dir", Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down"))
+	if bb._data["bb:dir"] != Vector2.ZERO: move_excuted(bb._data["bb:dir"])
 	if Input.is_action_pressed("ui_accept"): move_undo()
 	if Input.is_action_pressed("ui_cancel"): move_redo()
 
@@ -21,11 +26,14 @@ func move_excuted(vec : Vector2) -> void:
 	var command = MoveCommand.new(sprite_2d, sprite_2d.global_position, vec * 30)
 	CommandController.execute(command)
 
+
 func move_undo() -> void:
 	CommandController.undo()
 
+
 func move_redo() -> void:
 	CommandController.redo()
+
 
 func _on_command_executed(command: Command) -> void:
 	text_arr.append(command.get_description())
