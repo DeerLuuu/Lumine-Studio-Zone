@@ -1,0 +1,49 @@
+[gd_scene load_steps=4 format=3 uid="uid://nj52c3o40xvy"]
+
+[sub_resource type="Animation" id="Animation_6fcrs"]
+resource_name = "new_animation"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:text")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.49),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": ["开始游戏", " 游戏"]
+}
+
+[sub_resource type="Animation" id="Animation_vfvc6"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:text")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": ["开始游戏"]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_qih2i"]
+_data = {
+&"RESET": SubResource("Animation_vfvc6"),
+&"new_animation": SubResource("Animation_6fcrs")
+}
+
+[node name="Button" type="Button"]
+offset_right = 455.0
+offset_bottom = 259.0
+text = "开始游戏"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_qih2i")
+}
+autoplay = "new_animation"

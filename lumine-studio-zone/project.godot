@@ -17,8 +17,9 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-EventController="*res://scripts/event_controller/event_controller.gd"
-CommandController="*res://scripts/command_controller/command_controller.gd"
+EventController="*res://scripts/controller/event_controller/event_controller.gd"
+CommandController="*res://scripts/controller/command_controller/command_controller.gd"
+BlackboardController="*res://scripts/controller/BlackboardController/blackboard_controller.gd"
 
 [editor_plugins]
 

@@ -1,0 +1,18 @@
+[gd_scene load_steps=2 format=3 uid="uid://dh11xkb66l4o0"]
+
+[ext_resource type="Script" uid="uid://dneeght6volpk" path="res://scenes/main.gd" id="1_o5qli"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_o5qli")
+
+[node name="BackgroundLayer" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+
+[node name="ContextLayer" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+
+[node name="ToolTipLayer" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+
+[node name="PopTipLayer" type="CanvasLayer" parent="."]
+unique_name_in_owner = true

@@ -19,20 +19,23 @@
 		"tweenc" : "var tween : Tween = create_tween()",
 	},
 	"config" : {
-		"inline_completion_enabled" : false,
 		"auto_add_reg_ex_enabled" : true,
 		"auto_add_reg_ex" : {
 			"auto_add_event_name_rule" : [
-				"EventController.push_event\\(\"event:[^\"]*",
+				"EventController.push_event\\(\"event:[^\"]+",
 				"EventController.push_event(\""
 				],
 			"auto_add_state_name_rule" : [
-				"state_name\\s*=\\s*\"state:\\s*[^\"]*",
+				"state_name\\s*=\\s*\"state:\\s*[^\"]+",
 				"state_name=\""
 				],
 			"auto_add_bb_name_rule" : [
-				"add_value\\(\"bb:[^\"]*",
-				"add_value(\""
+				"\"bb:[^\"]+",
+				"\""
+				],
+			"auto_add_canvas_name_rule" : [
+				"\"canvas:[^\"]+",
+				"\""
 				],
 		},
 	},
